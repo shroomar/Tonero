@@ -1,6 +1,9 @@
 # Tonero white paper
 building a better internet
 
+download the white paper pdf file
+[Tonero paper.pdf](https://github.com/shroomar/Tonero/files/14050881/Tonero.paper.pdf)
+
 Introduction 
 
 We present the Tonero protocol. A revolutionary idea in communication in a pear to pear decentralised disorganised manner. which can completely replace current systems that rely on websites and web servers and third party service providers. Instead in Tonero any device can connect to any other device instantly and absolutely for free without the need for middlemen. 
