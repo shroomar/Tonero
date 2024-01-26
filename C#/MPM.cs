@@ -5,12 +5,11 @@ using System.Xml.Serialization;
 
 namespace Tonero
 {
-    [Serializable()]
-    enum Encoding
+    public enum Encoding
     { 
-        torrentLink,Ascii
+        torrentLink,text
     };
-    internal class MPM
+    public class MPM
     {
         public static string Prefix = "This is an MPM : ";
         public ulong UIN { get; set; }
@@ -19,8 +18,8 @@ namespace Tonero
         public bool Signed { set; get; }
         public List<string> Tags_original { get; set; }
         public List<string> Tags_response { get; set; }
-        public Encoding Coding { get; private set; }
-        public byte[] File { get; private set; }
+        public Encoding Coding { get; set; }
+        public byte[] File { get; set; }
         public MPM(Encoding c, byte[] f)
         {
             Personal = false;
@@ -35,6 +34,11 @@ namespace Tonero
             for (int i = 0; i < f.Length; i++)
                 File[i] = f[i];
         }
+        public MPM()
+        {
+            Tags_original = new List<string>();
+            Tags_response = new List<string>();
+        }
         public static MPM Import(string read)
         {
             return SerializationHelper.DeserializeXml<MPM>(read.Substring(Prefix.Length));
@@ -47,28 +51,28 @@ namespace Tonero
         {
             if (original)
             {
-                if (Tags_original.IndexOf(t) > -1)
+                if (Tags_original.IndexOf(t) == -1)
                     Tags_original.Add(t);
                 else Tags_original.Remove(t);
             }
             else
             {
-                if (Tags_response.IndexOf(t) > -1)
+                if (Tags_response.IndexOf(t) == -1)
                     Tags_response.Add(t);
                 else Tags_response.Remove(t);
             }
         }
-        public void MakePersonal(string MoneroPublicKey)
+        public void MakePersonal(string PublicKey)
         {
             // how to actually do this ? 
             Personal = true;
-            // File = Encryption(File, MoneroPublicKey); 
+            // File = Encryption(File, PublicKey); 
         }
-        public void Sign(string MoneroPrivateKey)
+        public void Sign(string PrivateKey)
         {
             // how to actually do this ? 
             Signed = true;
-            // File = Encryption(File, MoneroPrivateKey); 
+            // File = Encryption(File, PrivateKey); 
         }
         public string Export()
         {
