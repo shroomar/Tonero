@@ -43,10 +43,6 @@ namespace Tonero
         {
             return SerializationHelper.DeserializeXml<MPM>(read.Substring(Prefix.Length));
         }
-        public void SetTimeLimit(uint seconds)
-        {
-            TimeLimit = seconds;
-        }
         public void Add_DeleteTag(string t, bool original)
         {
             if (original)
