@@ -3,10 +3,6 @@ using System.Collections.Generic;
 
 namespace Tonero
 {
-    public enum Enc
-    { 
-        torrentLink,text
-    };
     public class MPM
     {
         public ulong UIN { get; set; }
@@ -15,21 +11,28 @@ namespace Tonero
         public bool Signed { set; get; }
         public List<string> Tags_original { get; set; }
         public List<string> Tags_response { get; set; }
-        public Enc Coding { get; set; }
         public byte[] File { get; set; }
-        public MPM(Enc c, byte[] f)
+        public MPM(string MainTag, byte[] magnet = null)
         {
             Personal = false;
             Signed = false;
-            Coding = c;
             Tags_original = new List<string>();
             Tags_response = new List<string>();
+            Tags_original.Add(MainTag);
             TimeLimit = 0;
             Random r = new Random();
             UIN = (ulong)(ulong.MaxValue * r.NextDouble());
-            File = new byte[f.Length];
-            for (int i = 0; i < f.Length; i++)
-                File[i] = f[i];
+            if (magnet != null)
+            {
+                File = new byte[magnet.Length];
+                for (int i = 0; i < magnet.Length; i++)
+                    File[i] = magnet[i];
+            }
+        }
+        public string GetMainTag()
+        {
+            if (Tags_original.Count == 0) return "";
+            return Tags_original[0];
         }
         public MPM()
         {
@@ -45,7 +48,7 @@ namespace Tonero
             string read = Serializer.Join(parts, rem);
             return Serializer.DeserializeXml<MPM>(read);
         }
-        public void Add_DeleteTag(string t, bool original)
+        public void Add_DeleteTag(string t, bool original = true)
         {
             if (original)
             {
