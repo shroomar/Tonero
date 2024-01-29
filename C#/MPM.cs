@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.IO;
 
 namespace Tonero
 {
@@ -9,59 +11,44 @@ namespace Tonero
         public uint TimeLimit { get; set; }
         public bool Personal { get; set; }
         public bool Signed { set; get; }
-        public List<string> Tags_original { get; set; }
-        public List<string> Tags_response { get; set; }
-        public byte[] File { get; set; }
-        public MPM(string MainTag, byte[] magnet = null)
+        public string Tag { get; set; }
+        public string Data { get; set; }
+        public MPM(string tg, string magnet = null)
         {
             Personal = false;
             Signed = false;
-            Tags_original = new List<string>();
-            Tags_response = new List<string>();
-            Tags_original.Add(MainTag);
+            Tag = tg;
             TimeLimit = 0;
             Random r = new Random();
             UIN = (ulong)(ulong.MaxValue * r.NextDouble());
-            if (magnet != null)
-            {
-                File = new byte[magnet.Length];
-                for (int i = 0; i < magnet.Length; i++)
-                    File[i] = magnet[i];
-            }
+            Data = magnet;
         }
-        public string GetMainTag()
+        public static MPM Import(string str)
         {
-            if (Tags_original.Count == 0) return "";
-            return Tags_original[0];
+            string read = Serializer.FromHexString(str);
+           
+            string[] x = read.Split('\n');
+
+            string[] y = x[0].Split(',');
+            ulong uin = ulong.Parse(y[0]);
+            uint time = uint.Parse(y[1]);
+            bool pers = y[2] == "1";
+            bool sign = y[3] == "1";
+            string tag = y[4];
+            
+            string f = Serializer.BuildTorrent(x[1]);
+
+            MPM m = new MPM(tag, f);
+            m.Personal = pers;
+            m.Signed = sign;
+            m.TimeLimit = time;
+            m.UIN = uin;
+            return m;
         }
-        public MPM()
+        public static MPM Load(string Path)
         {
-            Tags_original = new List<string>();
-            Tags_response = new List<string>();
-        }
-        public static MPM Import(string read)
-        {
-            return Serializer.DeserializeXml<MPM>(read);
-        }
-        public static MPM Import(string[] parts,int rem)
-        {
-            string read = Serializer.Join(parts, rem);
-            return Serializer.DeserializeXml<MPM>(read);
-        }
-        public void Add_DeleteTag(string t, bool original = true)
-        {
-            if (original)
-            {
-                if (Tags_original.IndexOf(t) == -1)
-                    Tags_original.Add(t);
-                else Tags_original.Remove(t);
-            }
-            else
-            {
-                if (Tags_response.IndexOf(t) == -1)
-                    Tags_response.Add(t);
-                else Tags_response.Remove(t);
-            }
+            string x = File.ReadAllText(Path);
+            return Import(x);
         }
         public void MakePersonal(string RecieverPublicKey)
         {
@@ -77,16 +64,25 @@ namespace Tonero
         }
         public string Export()
         {
-            return Serializer.SerializeXml(this);
+            string result = UIN + "," + TimeLimit + ",";
+            
+            if (Personal) result += "1";
+            else result += "0";
+            result += ",";
+
+            if (Signed) result += "1";
+            else result += "0";
+            result += ',';
+
+            result += Tag + '\n';
+
+            result += Serializer.TrimTorrent(Data);
+            return Serializer.ToHexString(result);
         }
-        public (int, string[]) Export(int limit)
+        public void Save(string Path, bool plain = false)
         {
-            string all = Serializer.SerializeXml(this);
-            return Serializer.Split(all, limit);
-        }
-        public static bool IsMPM(string str)
-        {
-            return str.StartsWith(Serializer.ToHexString(Serializer.Prefix));
+            string e = Export();
+            File.WriteAllText(Path, e);
         }
     }
 
