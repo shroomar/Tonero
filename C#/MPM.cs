@@ -79,7 +79,7 @@ namespace Tonero
             result += Serializer.TrimTorrent(Data);
             return Serializer.ToHexString(result);
         }
-        public void Save(string Path, bool plain = false)
+        public void Save(string Path)
         {
             string e = Export();
             File.WriteAllText(Path, e);
